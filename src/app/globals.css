@@ -8,7 +8,7 @@ body,
   height: 100%;
 }
 
-/* :root {
+:root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -97,4 +97,4 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-} */
+}
