@@ -1,4 +1,4 @@
-import { Toolbar } from "../../../components/workspace-toolbar";
+import { Toolbar } from "@/components/workspace/workspace-toolbar";
 
 type WorkspaceLaoyutProps = {
   children: React.ReactNode;
