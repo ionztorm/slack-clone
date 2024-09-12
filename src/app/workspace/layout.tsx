@@ -1,3 +1,4 @@
+import { Sidebar } from "@/components/workspace/workspace-sidebar";
 import { Toolbar } from "@/components/workspace/workspace-toolbar";
 
 type WorkspaceLaoyutProps = {
@@ -8,7 +9,10 @@ const WorkspaceLayout = ({ children }: WorkspaceLaoyutProps) => {
   return (
     <div className="h-full">
       <Toolbar />
-      {children}
+      <div className="flex h-[calc(100vh-40px)]">
+        <Sidebar />
+        {children}
+      </div>
     </div>
   );
 };

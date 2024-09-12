@@ -11,7 +11,7 @@ import { useWorkspaceId } from "@/hooks/use-workspace-id";
 const WorkspacePage = () => {
   const workspaceId = useWorkspaceId();
   const { data } = useGetWorkspace({ id: workspaceId });
-  return <div>Data: {JSON.stringify(data)}</div>;
+  return <div>Workspace Page</div>;
 };
 
 export default WorkspacePage;
