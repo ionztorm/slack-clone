@@ -33,7 +33,7 @@ export const useCreateWorkspace = () => {
   */
 
   // create the mutation function
-  const mutation = useMutation(api.workspaces.post);
+  const mutation = useMutation(api.workspaces.create);
   // wrap the mutation to handle errors and state
   // memoise it to avoid unneccessarily recreating it.
   const mutate = useCallback(
