@@ -1,5 +1,12 @@
-import { Sidebar } from "@/components/workspace/workspace-sidebar";
+//"use client";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { Sidebar } from "@/components/sidebar";
 import { Toolbar } from "@/components/workspace/workspace-toolbar";
+import { WorkspaceSidebar } from "@/components/workspace/workspace-sidebar";
 
 type WorkspaceLaoyutProps = {
   children: React.ReactNode;
@@ -11,7 +18,20 @@ const WorkspaceLayout = ({ children }: WorkspaceLaoyutProps) => {
       <Toolbar />
       <div className="flex h-[calc(100vh-40px)]">
         <Sidebar />
-        {children}
+        <ResizablePanelGroup
+          direction="horizontal"
+          autoSaveId="sc-workspace-layout"
+        >
+          <ResizablePanel
+            defaultSize={20}
+            minSize={11}
+            className="bg-[#5e2c5f]"
+          >
+            <WorkspaceSidebar />
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel minSize={20}>{children}</ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );

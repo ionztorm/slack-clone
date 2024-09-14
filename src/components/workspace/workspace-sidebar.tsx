@@ -1,25 +1,40 @@
-import { UserButton } from "@/features/auth/components/user-button";
-import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
-import { SidebarButton } from "@/components/workspace/workspace-sidebar-button";
-import {
-  BellIcon,
-  Home,
-  MessagesSquareIcon,
-  MoreHorizontal,
-} from "lucide-react";
+"use client";
+import { useCurrentMember } from "@/features/members/api/use-current-member";
+import { useGetWorkspace } from "@/features/workspaces/api/use-get-workspace";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
+import { AlertTriangle, Loader } from "lucide-react";
+import { WorkspaceHeader } from "./workspace-header";
 
-export const Sidebar = () => {
-  return (
-    <aside className="w-[70px] h-full bg-[#481349] flex flex-col gap-y-4 items-center pt-[9px] pb-4">
-      <WorkspaceSwitcher />
-      <SidebarButton icon={Home} label="Home" isActive />
+export const WorkspaceSidebar = () => {
+  const workspaceId = useWorkspaceId();
+  const { data: member, isIsLoading: memberLoading } = useCurrentMember({
+    workspaceId,
+  });
+  const { data: workspace, isLoading: workspaceLoading } = useGetWorkspace({
+    id: workspaceId,
+  });
 
-      <SidebarButton icon={MessagesSquareIcon} label="DMs" />
-      <SidebarButton icon={BellIcon} label="Activity" />
-      <SidebarButton icon={MoreHorizontal} label="More" />
-      <div className="flex flex-col items-center justify-center gap-y-1 mt-auto">
-        <UserButton />
+  if (workspaceLoading || memberLoading)
+    return (
+      <div className="flex flex-col bg-[#5e2c5f] h-full items-center justify-center">
+        <Loader className="size-5 animate-spin text-white" />
       </div>
-    </aside>
+    );
+
+  if (!workspace || !member)
+    return (
+      <div className="flex flex-col gap-y-2 bg-[#5e2c5f] h-full items-center justify-center">
+        <AlertTriangle className="size-5 text-white" />
+        <p className="text-white text-sm">Workspace not found</p>
+      </div>
+    );
+
+  return (
+    <div className="flex flex-col gap-y-2 bg-[#5e2c5f] h-full">
+      <WorkspaceHeader
+        workspace={workspace}
+        isAdmin={member.role === "admin"}
+      />
+    </div>
   );
 };
