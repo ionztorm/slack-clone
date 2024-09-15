@@ -2,7 +2,7 @@ import { convexAuth } from "@convex-dev/auth/server";
 import GitHub from "@auth/core/providers/github";
 import Google from "@auth/core/providers/google";
 import { Password } from "@convex-dev/auth/providers/Password";
-import { DataModel } from "./_generated/dataModel";
+import type { DataModel } from "./_generated/dataModel";
 
 // Set custom Password provider to accept additional data, ie, name, role, etc.
 const CustomPassword = Password<DataModel>({

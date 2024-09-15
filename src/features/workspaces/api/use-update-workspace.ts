@@ -10,10 +10,10 @@ type Options = {
   throwError?: boolean;
 };
 
-type RequestType = { name: string };
+type RequestType = { id: Id<"workspaces">; name: string };
 type ResponseType = Id<"workspaces"> | null;
 
-export const useCreateWorkspace = () => {
+export const useUpdateWorkspace = () => {
   const [data, setData] = useState<ResponseType>(null);
   const [error, setError] = useState<Error | null>(null);
 
@@ -33,7 +33,7 @@ export const useCreateWorkspace = () => {
   */
 
   // create the mutation function
-  const mutation = useMutation(api.workspaces.create);
+  const mutation = useMutation(api.workspaces.update);
   // wrap the mutation to handle errors and state
   // memoise it to avoid unneccessarily recreating it.
   const mutate = useCallback(
