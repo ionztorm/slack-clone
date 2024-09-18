@@ -15,9 +15,14 @@ import {
 	SendHorizonal,
 } from "lucide-react";
 import { UserItem } from "./workspace-user-item";
+import { useCreateChannelModal } from "@/features/channels/store/use-create-channel-modal";
+import { isMemberAdmin } from "@/data/authorisation";
 
 export const WorkspaceSidebar = () => {
 	const workspaceId = useWorkspaceId();
+
+	const [_open, setOpen] = useCreateChannelModal();
+
 	const { data: member, isIsLoading: memberLoading } = useCurrentMember({
 		workspaceId,
 	});
@@ -50,10 +55,7 @@ export const WorkspaceSidebar = () => {
 
 	return (
 		<div className="flex flex-col gap-y-2 bg-[#5e2c5f] h-full">
-			<WorkspaceHeader
-				workspace={workspace}
-				isAdmin={member.role === "admin"}
-			/>
+			<WorkspaceHeader workspace={workspace} isAdmin={isMemberAdmin(member)} />
 			<div className="flex flex-col px-2 mt-3">
 				{/* sidebar items */}
 				<SidebarItem
@@ -70,7 +72,13 @@ export const WorkspaceSidebar = () => {
 				/>
 			</div>
 
-			<WorkspaceSection label="channels" hint="New channel" onNew={() => {}}>
+			<WorkspaceSection
+				label="channels"
+				hint="New channel"
+				// since the add button is only rendered when the onNew is passed,
+				// we can conditionally pass undefined for non-admins so the button does not render.
+				onNew={isMemberAdmin(member) ? () => setOpen(true) : undefined}
+			>
 				{/* channels  */}
 				{channels?.map((channelItem) => (
 					<SidebarItem

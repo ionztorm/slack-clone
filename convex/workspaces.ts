@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { isMemberAdmin } from "../src/data/authorisation";
 
 const generateCode = () => {
 	const code = Array.from(
@@ -107,7 +108,7 @@ export const update = mutation({
 			.unique();
 
 		// ensure valid membership existr and that member is admin of workspace
-		if (!member || member.role !== "admin") throw new Error("Unauthorised");
+		if (!member || !isMemberAdmin(member)) throw new Error("Unauthorised");
 
 		await ctx.db.patch(args.id, { name: args.name });
 
@@ -133,7 +134,7 @@ export const remove = mutation({
 			.unique();
 
 		// ensure valid membership existr and that member is admin of workspace
-		if (!member || member.role !== "admin") throw new Error("Unauthorised");
+		if (!member || !isMemberAdmin(member)) throw new Error("Unauthorised");
 
 		// get members associated with workspace
 		const [members] = await Promise.all([
