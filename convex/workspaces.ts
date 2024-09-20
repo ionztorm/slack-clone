@@ -3,14 +3,12 @@ import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { isMemberAdmin } from "../src/data/authorisation";
 
-const generateCode = () => {
-	const code = Array.from(
+const generateCode = () =>
+	Array.from(
 		{ length: 6 },
 		() =>
 			"0123456789abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 36)],
 	).join("");
-	return code;
-};
 
 // create workspaces
 export const create = mutation({
@@ -66,6 +64,25 @@ export const get = query({
 		}
 
 		return workspaces;
+	},
+});
+
+export const getInfoById = query({
+	args: { workspaceId: v.id("workspaces") },
+	handler: async (ctx, args) => {
+		const userId = await getAuthUserId(ctx);
+		if (!userId) return null;
+
+		const member = await ctx.db
+			.query("members")
+			.withIndex("by_workspace_id_user_id", (q) =>
+				q.eq("workspaceId", args.workspaceId).eq("userId", userId),
+			)
+			.unique();
+
+		const workspace = await ctx.db.get(args.workspaceId);
+
+		return { name: workspace?.name, isMember: !!member };
 	},
 });
 
@@ -177,5 +194,43 @@ export const newJoinCode = mutation({
 		await ctx.db.patch(args.workspaceId, { joinCode });
 
 		return args.workspaceId;
+	},
+});
+
+export const join = mutation({
+	args: {
+		joinCode: v.string(),
+		workspaceId: v.id("workspaces"),
+	},
+	handler: async (ctx, args) => {
+		const userId = await getAuthUserId(ctx);
+
+		if (!userId) throw new Error("Unauthorised");
+
+		const workspace = await ctx.db.get(args.workspaceId);
+
+		if (!workspace)
+			throw new Error("Workspace does not exist. It may have been deleted.");
+
+		if (args.joinCode.toLocaleLowerCase() !== workspace.joinCode)
+			throw new Error("Invalid join code.");
+
+		const existingMember = await ctx.db
+			.query("members")
+			.withIndex("by_workspace_id_user_id", (q) =>
+				q.eq("workspaceId", args.workspaceId).eq("userId", userId),
+			)
+			.unique();
+
+		if (existingMember)
+			throw new Error("You are already a member of this workspace");
+
+		await ctx.db.insert("members", {
+			userId,
+			workspaceId: args.workspaceId,
+			role: "member",
+		});
+
+		return workspace._id;
 	},
 });

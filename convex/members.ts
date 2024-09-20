@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { type QueryCtx, query } from "./_generated/server";
 
-const popultaeUser = async (ctx: QueryCtx, id: Id<"users">) => {
+const populateUser = async (ctx: QueryCtx, id: Id<"users">) => {
 	return ctx.db.get(id);
 };
 
@@ -48,7 +48,7 @@ export const get = query({
 		const members = [];
 
 		for (const member of data) {
-			const user = await popultaeUser(ctx, member.userId);
+			const user = await populateUser(ctx, member.userId);
 			if (user) members.push({ ...member, user });
 		}
 
