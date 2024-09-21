@@ -8,6 +8,6 @@ type UseCurrentMemberProps = {
 
 export const useCurrentMember = ({ workspaceId }: UseCurrentMemberProps) => {
   const data = useQuery(api.members.current, { workspaceId });
-  const isIsLoading = data === undefined;
-  return { data, isIsLoading };
+  const isLoading = data === undefined;
+  return { data, isLoading };
 };
