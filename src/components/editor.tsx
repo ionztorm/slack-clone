@@ -7,7 +7,11 @@ import { MdSend } from "react-icons/md";
 import { ImageIcon, Smile } from "lucide-react";
 import { Hint } from "./hint";
 
-const Editor = () => {
+type EditorProps = {
+	variant?: "create" | "update";
+};
+
+const Editor = ({ variant = "create" }: EditorProps) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -54,27 +58,53 @@ const Editor = () => {
 							<Smile className="size-4" />
 						</Button>
 					</Hint>
-					<Hint label="Insert image">
-						<Button
-							className=""
-							size="iconSm"
-							disabled={false}
-							variant="ghost"
-							onClick={() => {}}
-						>
-							<ImageIcon className="size-4" />
-						</Button>
-					</Hint>
-					<Hint label="Submit">
-						<Button
-							className="ml-auto bg-[#007a5a] hover:bg-[#007a5a]/80 text-white"
-							size="iconSm"
-							disabled={false}
-							onClick={() => {}}
-						>
-							<MdSend className="size-4" />
-						</Button>
-					</Hint>
+					{variant === "create" && (
+						<Hint label="Insert image">
+							<Button
+								className=""
+								size="iconSm"
+								disabled={false}
+								variant="ghost"
+								onClick={() => {}}
+							>
+								<ImageIcon className="size-4" />
+							</Button>
+						</Hint>
+					)}
+					{variant === "update" && (
+						<div className="ml-auto flex items-center gap-x-2">
+							<Button
+								className=""
+								variant="outline"
+								size="sm"
+								onClick={() => {}}
+								disabled={false}
+							>
+								Cancel
+							</Button>
+							<Button
+								className="bg-[#007a5a] hover:bg-[#007a5a]/80 text-white"
+								variant="outline"
+								size="sm"
+								onClick={() => {}}
+								disabled={false}
+							>
+								Save
+							</Button>
+						</div>
+					)}
+					{variant === "create" && (
+						<Hint label="Submit">
+							<Button
+								className="ml-auto bg-[#007a5a] hover:bg-[#007a5a]/80 text-white"
+								size="iconSm"
+								disabled={false}
+								onClick={() => {}}
+							>
+								<MdSend className="size-4" />
+							</Button>
+						</Hint>
+					)}
 				</div>
 			</div>
 			<div className="p-2 text-[10px] text-muted-foreground flex justify-end">
