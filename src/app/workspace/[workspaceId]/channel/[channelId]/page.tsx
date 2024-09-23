@@ -1,5 +1,6 @@
 "use client";
 
+import { ChatInput } from "@/components/channel/channel-chat-input";
 import { ChannelHeader } from "@/components/channel/channel-header";
 import { useGetChannel } from "@/features/channels/api/use-get-channel";
 import { useChannelId } from "@/hooks/use-channel-id";
@@ -29,6 +30,8 @@ const ChannelPage = () => {
 	return (
 		<div className="flex flex-col h-full">
 			<ChannelHeader title={channel.name} />
+			<div className="flex-1" />
+			<ChatInput />
 		</div>
 	);
 };
