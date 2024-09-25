@@ -10,11 +10,12 @@ import {
 import { Button } from "./ui/button";
 import { PiTextAa } from "react-icons/pi";
 import { MdSend } from "react-icons/md";
-import { ImageIcon, Smile } from "lucide-react";
+import { ImageIcon, Smile, XIcon } from "lucide-react";
 import { Hint } from "./hint";
 import type { Delta, Op } from "quill/core";
 import { cn } from "@/lib/utils";
-import { Emoji, EmojiPopover } from "./emoji-popover";
+import { type Emoji, EmojiPopover } from "./emoji-popover";
+import Image from "next/image";
 
 type EditorValue = {
 	image: File | null;
@@ -42,6 +43,7 @@ const Editor = ({
 }: EditorProps) => {
 	// state for rerenders since the refs will not trigger any
 	const [text, setText] = useState("");
+	const [image, setImage] = useState<File | null>(null);
 	const [isToolbarVisible, setIsToolbarVisible] = useState(true);
 
 	// so we can use in Effect without causing re-renders
@@ -53,6 +55,7 @@ const Editor = ({
 	// const innerRefRef = useRef(innerRef);
 	const quillRef = useRef<Quill | null>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
+	const imageElementRef = useRef<HTMLInputElement | null>(null);
 
 	// update refs if needed, without causing rerenders
 	useLayoutEffect(() => {
@@ -137,8 +140,48 @@ const Editor = ({
 
 	return (
 		<div className="flex flex-col">
+			<input
+				type="file"
+				accept="image/*"
+				ref={imageElementRef}
+				onChange={(e) => {
+					const file = e.target.files?.[0]; // Optional chaining to safely access the file
+					if (file) {
+						setImage(file); // Only set the image if there's a valid file
+					} else {
+						setImage(null); // Handle case where no file is selected
+					}
+				}}
+				className="hidden"
+			/>
 			<div className="flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white">
 				<div ref={containerRef} className="w-full ql-custom" />
+				{!!image && (
+					<div className="p-2 ">
+						<div className="relative size-[62px] flex items-center justify-center group/image">
+							<Hint label="Remove image">
+								<button
+									type="button"
+									onClick={() => {
+										setImage(null);
+										if (imageElementRef.current)
+											imageElementRef.current.value = "";
+									}}
+									className="hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-[4] border-2 items-center justify-center"
+								>
+									<XIcon className="size-3.5" />
+								</button>
+							</Hint>
+
+							<Image
+								src={URL.createObjectURL(image)}
+								alt="uploaded image"
+								fill
+								className="rounded-xl overflow-hidden border object-cover"
+							/>
+						</div>
+					</div>
+				)}
 				<div className="flex px-2 pb-2 z-[5]">
 					<Hint
 						label={isToolbarVisible ? "Hide formatting" : "Show formatting"}
@@ -173,7 +216,8 @@ const Editor = ({
 								size="iconSm"
 								disabled={disabled}
 								variant="ghost"
-								onClick={() => {}}
+								// simulate clicking on the hidden input.
+								onClick={() => imageElementRef.current?.click()}
 							>
 								<ImageIcon className="size-4" />
 							</Button>
