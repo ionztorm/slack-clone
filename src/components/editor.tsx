@@ -47,13 +47,11 @@ const Editor = ({
   const [image, setImage] = useState<File | null>(null);
   const [isToolbarVisible, setIsToolbarVisible] = useState(true);
 
-  // so we can use in Effect without causing re-renders
+  // use refs so we can use in Effect without causing re-renders
   const submitRef = useRef(onSubmit);
-  // const cancelRef = useRef(onCancel);
   const placeholderRef = useRef(placeholder);
   const defaultValueRef = useRef(defaultValue);
   const disabledRef = useRef(disabled);
-  // const innerRefRef = useRef(innerRef);
   const quillRef = useRef<Quill | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageElementRef = useRef<HTMLInputElement | null>(null);
@@ -88,7 +86,6 @@ const Editor = ({
             enter: {
               key: "Enter",
               handler: () => {
-                //TODO submit form
                 const text = quill.getText();
                 const addedImage = imageElementRef.current?.files?.[0] || null;
                 const isEmpty =
