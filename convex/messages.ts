@@ -13,84 +13,69 @@ import { mutation, query } from "./_generated/server";
 
 export const get = query({
 	args: {
-		channelId: v.optional(v.id("channels")), // Optional channel ID
-		conversationId: v.optional(v.id("conversations")), // Optional conversation ID
-		parentMessageId: v.optional(v.id("messages")), // Optional parent message ID
-		// NOTE : Convex pagination
-		paginationOpts: paginationOptsValidator, // Pagination options validator
+		channelId: v.optional(v.id("channels")),
+		conversationId: v.optional(v.id("conversations")),
+		parentMessageId: v.optional(v.id("messages")),
+		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
-		const userId = await getAuthUserId(ctx); // Get authenticated user ID
-		if (!userId) throw new Error("Unauthorised"); // Check for authorization
+		const userId = await getAuthUserId(ctx);
+		if (!userId) throw new Error("Unauthorised");
 
-		let _convesationId = args.conversationId; // Initialize conversation ID
+		let _convesationId = args.conversationId;
 
-		// If no conversation or channel ID, but a parent message ID is provided
+		// Resolve conversation ID from parent message if needed
 		if (!args.conversationId && !args.channelId && args.parentMessageId) {
-			const parentMessage = await ctx.db.get(args.parentMessageId); // Fetch parent message
-
-			if (!parentMessage) throw new Error("Parent message not found."); // Check if parent message exists
-
-			_convesationId = parentMessage.conversationId; // Set conversation ID from parent message
+			const parentMessage = await ctx.db.get(args.parentMessageId);
+			if (!parentMessage) throw new Error("Parent message not found.");
+			_convesationId = parentMessage.conversationId;
 		}
 
-		// Query messages with specified filters and pagination
 		const results = await ctx.db
 			.query("messages")
-			.withIndex(
-				"by_channel_id_parent_message_id_conversation_id",
-				(q) =>
-					q
-						.eq("channelId", args.channelId) // Filter by channel ID
-						.eq("parentMessageId", args.parentMessageId) // Filter by parent message ID
-						.eq("conversationId", _convesationId), // Filter by conversation ID
+			.withIndex("by_channel_id_parent_message_id_conversation_id", (q) =>
+				q
+					.eq("channelId", args.channelId)
+					.eq("parentMessageId", args.parentMessageId)
+					.eq("conversationId", _convesationId),
 			)
-			// NOTE : using convex pagination
-			.order("desc") // Order results in descending order
-			.paginate(args.paginationOpts); // Apply pagination options
+			.order("desc")
+			.paginate(args.paginationOpts);
 
 		return {
-			...results, // Spread existing results
+			...results,
 			page: (
 				await Promise.all(
 					results.page.map(async (message) => {
-						// Map over each message in the results
-						const member = await populateMember(ctx, message.memberId); // Populate member details
-						const user = member ? await populateUser(ctx, member.userId) : null; // Populate user details
+						const member = await populateMember(ctx, message.memberId);
+						const user = member ? await populateUser(ctx, member.userId) : null;
+						if (!member || !user) return null;
 
-						if (!member || !user) return null; // Return null if member or user not found
-
-						const reactions = await populateReactions(ctx, message._id); // Populate reactions for the message
-						const thread = await populateThread(ctx, message._id); // Populate thread details
+						const reactions = await populateReactions(ctx, message._id);
+						const thread = await populateThread(ctx, message._id);
 						const image = message.image
-							? await ctx.storage.getUrl(message.image) // Get image URL if it exists
+							? await ctx.storage.getUrl(message.image)
 							: undefined;
 
-						// Count reactions and group them by value
-						const reactionsWithCounts = reactions.map((reaction) => {
-							return {
-								...reaction,
-								count: reactions.filter((r) => r.value === reaction.value)
-									.length, // Count occurrences of each reaction
-							};
-						});
+						// Count and deduplicate reactions
+						const reactionsWithCounts = reactions.map((reaction) => ({
+							...reaction,
+							count: reactions.filter((r) => r.value === reaction.value).length,
+						}));
 
-						// Deduplicate reactions and group member IDs
 						const dedupeReactions = reactionsWithCounts.reduce(
 							(acc, reaction) => {
 								const existingReaction = acc.find(
-									(r) => r.value === reaction.value, // Check for existing reaction
+									(r) => r.value === reaction.value,
 								);
-
 								if (existingReaction) {
 									existingReaction.memberIds = Array.from(
-										new Set([...existingReaction.memberIds, reaction.memberId]), // Add member ID to existing reaction
+										new Set([...existingReaction.memberIds, reaction.memberId]),
 									);
 								} else {
-									acc.push({ ...reaction, memberIds: [reaction.memberId] }); // Add new reaction
+									acc.push({ ...reaction, memberIds: [reaction.memberId] });
 								}
-
-								return acc; // Return accumulated reactions
+								return acc;
 							},
 							[] as (Doc<"reactions"> & {
 								count: number;
@@ -98,25 +83,24 @@ export const get = query({
 							})[],
 						);
 
-						// Remove memberId from reactions for the final output
 						const reactionsWithoutMemberIdProperty = dedupeReactions.map(
 							({ memberId, ...rest }) => rest,
 						);
 
 						return {
-							...message, // Spread original message properties
-							image, // Include image URL
-							member, // Include member details
-							user, // Include user details
-							reactions: reactionsWithoutMemberIdProperty, // Include processed reactions
-							threadCount: thread.count, // Include thread count
-							threadImage: thread.image, // Include thread image
-							threadTimestamp: thread.timestamp, // Include thread timestamp
+							...message,
+							image,
+							member,
+							user,
+							reactions: reactionsWithoutMemberIdProperty,
+							threadCount: thread.count,
+							threadImage: thread.image,
+							threadTimestamp: thread.timestamp,
 						};
 					}),
 				)
 			).filter(
-				(message): message is NonNullable<typeof message> => message !== null, // Filter out null messages
+				(message): message is NonNullable<typeof message> => message !== null,
 			),
 		};
 	},

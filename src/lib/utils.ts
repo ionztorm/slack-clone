@@ -7,6 +7,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const avatarFallback = (str: string) => str.charAt(0).toUpperCase();
+
 export const replaceSpaceWithHyphen = (text: string) =>
   text.replace(/\s+/g, "-").toLocaleLowerCase();
 
