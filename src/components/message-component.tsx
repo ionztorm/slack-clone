@@ -1,5 +1,7 @@
 import { useRemoveMessage } from "@/features/messages/api/use-remove-message";
 import { useUpdateMessage } from "@/features/messages/api/use-update-message";
+import { useToggleReaction } from "@/features/reactions/api/use-toggle-reaction";
+import { useConfirm } from "@/hooks/use-confirm";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
 import dynamic from "next/dynamic";
@@ -7,9 +9,9 @@ import { toast } from "sonner";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { Hint } from "./hint";
 import { MessageToolbar } from "./message-toolbar";
+import { Reactions } from "./reactions-bar";
 import { Thumbnail } from "./thumbnail";
 import { UserAvatar } from "./user-avatar";
-import { useConfirm } from "@/hooks/use-confirm";
 
 const Renderer = dynamic(() => import("@/components/message-renderer"), {
 	ssr: false,
@@ -72,6 +74,19 @@ export function Message({
 	const { mutate: updateMessage, isPending } = useUpdateMessage();
 	const { mutate: removeMessage, isPending: isRemovingMessage } =
 		useRemoveMessage();
+	const { mutate: toggleReaction, isPending: isTogglingReaction } =
+		useToggleReaction();
+
+	const handleReaction = (value: string) => {
+		toggleReaction(
+			{ messageId: id, value },
+			{
+				onError: () => {
+					toast.error("Failed to toggle reaction");
+				},
+			},
+		);
+	};
 
 	const handleUpdate = ({ body }: { body: string }) => {
 		updateMessage(
@@ -148,6 +163,7 @@ export function Message({
 										(edited)
 									</span>
 								) : null}
+								<Reactions reactions={reactions} onChange={handleReaction} />
 							</div>
 						)}
 					</div>
@@ -159,7 +175,7 @@ export function Message({
 							handleEdit={() => setEditingId(id)}
 							handleDelete={handleRemoveMessage}
 							handleThread={() => {}}
-							handleReaction={() => {}}
+							handleReaction={handleReaction}
 						/>
 					)}
 				</div>
@@ -216,6 +232,7 @@ export function Message({
 							{updatedAt ? (
 								<span className="text-xs text-muted-foreground">(edited)</span>
 							) : null}
+							<Reactions reactions={reactions} onChange={handleReaction} />
 						</div>
 					)}
 				</div>
@@ -227,7 +244,7 @@ export function Message({
 						handleEdit={() => setEditingId(id)}
 						handleDelete={handleRemoveMessage}
 						handleThread={() => {}}
-						handleReaction={() => {}}
+						handleReaction={handleReaction}
 					/>
 				)}
 			</div>

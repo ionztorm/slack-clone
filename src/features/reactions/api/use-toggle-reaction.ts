@@ -11,16 +11,12 @@ type Options = {
 };
 
 type RequestType = {
-	body: string;
-	image?: Id<"_storage">;
-	workspaceId: Id<"workspaces">;
-	channelId?: Id<"channels">;
-	parentMessageId?: Id<"messages">;
-	conversationId?: Id<"conversations">;
+	value: string;
+	messageId: Id<"messages">;
 };
-type ResponseType = Id<"messages"> | null;
+type ResponseType = Id<"reactions"> | null;
 
-export const useCreateMessage = () => {
+export const useToggleReaction = () => {
 	const [data, setData] = useState<ResponseType>(null);
 	const [error, setError] = useState<Error | null>(null);
 
@@ -40,7 +36,7 @@ export const useCreateMessage = () => {
   */
 
 	// create the mutation function
-	const mutation = useMutation(api.messages.create);
+	const mutation = useMutation(api.reactions.toggle);
 	// wrap the mutation to handle errors and state
 	// memoise it to avoid unneccessarily recreating it.
 	const mutate = useCallback(
