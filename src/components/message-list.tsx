@@ -1,14 +1,13 @@
+import { useCurrentMember } from "@/features/members/api/use-current-member";
 import type { GetMessagesReturnType } from "@/features/messages/api/use-get-messages";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
+import { MESSAGE_GROUPING_TIME_THRESHOLD } from "@/lib/constants";
 import { differenceInMinutes, format, isToday, isYesterday } from "date-fns";
-import { ChannelHero } from "./channel/channel-hero";
-import { Message } from "./message-component";
+import { Loader } from "lucide-react";
 import { useState } from "react";
 import type { Id } from "../../convex/_generated/dataModel";
-import { useWorkspaceId } from "@/hooks/use-workspace-id";
-import { useCurrentMember } from "@/features/members/api/use-current-member";
-import { Loader } from "lucide-react";
-
-const TIME_THRESHOLD = 5;
+import { ChannelHero } from "./channel/channel-hero";
+import { Message } from "./message-component";
 
 type MessageListProps = {
   memberName?: string;
@@ -76,7 +75,7 @@ export const MessageList = ({
               differenceInMinutes(
                 new Date(message._creationTime),
                 new Date(prevMessage._creationTime),
-              ) < TIME_THRESHOLD;
+              ) < MESSAGE_GROUPING_TIME_THRESHOLD;
             return (
               <Message
                 key={message._id}
