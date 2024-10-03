@@ -1,8 +1,7 @@
+import { MESSAGES_BATCH_SIZE } from "@/lib/constants";
 import { usePaginatedQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
-
-const BATCH_SIZE = 20;
 
 type UseGetMessagesProps = {
   channelId?: Id<"channels">;
@@ -21,12 +20,12 @@ export const useGetMessages = ({
   const { results, status, loadMore } = usePaginatedQuery(
     api.messages.get,
     { channelId, conversationId, parentMessageId },
-    { initialNumItems: BATCH_SIZE },
+    { initialNumItems: MESSAGES_BATCH_SIZE },
   );
 
   return {
     results,
     status,
-    loadMore: () => loadMore(BATCH_SIZE),
+    loadMore: () => loadMore(MESSAGES_BATCH_SIZE),
   };
 };
