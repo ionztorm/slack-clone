@@ -2,10 +2,18 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { QueryCtx } from "../../convex/_generated/server";
 import type { Id } from "../../convex/_generated/dataModel";
+import { format, isToday, isYesterday } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const formatDateLabel = (dateStr: string) => {
+  const date = new Date(dateStr);
+  if (isToday(date)) return "Today";
+  if (isYesterday(date)) return "Yesterday";
+  return format(date, "EEEE, MMMM, d");
+};
 
 export const avatarFallback = (str: string) => str.charAt(0).toUpperCase();
 

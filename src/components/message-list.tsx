@@ -3,11 +3,12 @@ import type { GetMessagesReturnType } from "@/features/messages/api/use-get-mess
 import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { MESSAGE_GROUPING_TIME_THRESHOLD } from "@/lib/constants";
 import { differenceInMinutes, format, isToday, isYesterday } from "date-fns";
-import { Loader } from "lucide-react";
 import { useState } from "react";
 import type { Id } from "../../convex/_generated/dataModel";
 import { ChannelHero } from "./channel/channel-hero";
 import { Message } from "./message-component";
+import { LoadingMoreMessages } from "./messages/loading-more";
+import { MessagePaginationObserver } from "./messages/message-pagination-observer";
 
 type MessageListProps = {
   memberName?: string;
@@ -101,29 +102,11 @@ export const MessageList = ({
           })}
         </div>
       ))}
-      <div
-        className="h-1"
-        ref={(element) => {
-          if (element) {
-            const observer = new IntersectionObserver(
-              ([entry]) => {
-                if (entry.isIntersecting && canLoadMore) loadMore();
-              },
-              { threshold: 1.0 },
-            );
-            observer.observe(element);
-            return () => observer.disconnect();
-          }
-        }}
+      <MessagePaginationObserver
+        canLoadMore={canLoadMore}
+        loadMore={loadMore}
       />
-      {isLoadingMore && (
-        <div className="text-center my-2 relative">
-          <hr className="absolute top-1/2 left-0 right-0 border-t border-gray-300" />
-          <span className="relative inline-block bg-white px-4 py-1 rounded-full text-xs border border-gray-300">
-            <Loader className="size-4 animate-spin" />
-          </span>
-        </div>
-      )}
+      {isLoadingMore && <LoadingMoreMessages />}
       {variant === "channel" && channelName && channelCreationTime && (
         <ChannelHero name={channelName} creationTime={channelCreationTime} />
       )}
