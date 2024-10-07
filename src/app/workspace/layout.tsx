@@ -12,15 +12,16 @@ import { usePanel } from "@/hooks/use-panel";
 import { Loader, LoaderIcon } from "lucide-react";
 import { PiThreadsLogo } from "react-icons/pi";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { Profile } from "@/features/members/components/member-profile";
 
 type WorkspaceLaoyutProps = {
   children: React.ReactNode;
 };
 
 const WorkspaceLayout = ({ children }: WorkspaceLaoyutProps) => {
-  const { parentMessageId, onClose } = usePanel();
+  const { parentMessageId, onClose, profileMemberId } = usePanel();
 
-  const showPanel = !!parentMessageId;
+  const showPanel = !!parentMessageId || !!profileMemberId;
 
   return (
     <div className="h-full">
@@ -50,7 +51,13 @@ const WorkspaceLayout = ({ children }: WorkspaceLaoyutProps) => {
                     onClose={onClose}
                   />
                 )}
-                {!parentMessageId && (
+                {profileMemberId && (
+                  <Profile
+                    memberId={profileMemberId as Id<"members">}
+                    onClose={onClose}
+                  />
+                )}
+                {!parentMessageId && !profileMemberId && (
                   <div className="h-full flex justify-center items-center">
                     <Loader className="size-5 animate-spin text-muted-foreground" />
                   </div>
