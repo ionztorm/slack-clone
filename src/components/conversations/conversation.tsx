@@ -6,44 +6,47 @@ import { Loading } from "../loading";
 import { ConversationHeader } from "./conversation-header";
 import { ChatInput } from "./conversation-chat-input";
 import { MessageList } from "../message-list";
+import { usePanel } from "@/hooks/use-panel";
 
 type ConversationsProps = {
-	id: Id<"conversations">;
+  id: Id<"conversations">;
 };
 
 export function Conversation({ id }: ConversationsProps) {
-	const memberId = useMemberId();
+  const memberId = useMemberId();
 
-	const { data: member, isLoading: isMemberLoading } = useGetMember({
-		id: memberId,
-	});
+  const { onOpenProfile } = usePanel();
 
-	const { results, status, loadMore } = useGetMessages({ conversationId: id });
+  const { data: member, isLoading: isMemberLoading } = useGetMember({
+    id: memberId,
+  });
 
-	if (isMemberLoading || status === "LoadingFirstPage") return <Loading />;
+  const { results, status, loadMore } = useGetMessages({ conversationId: id });
 
-	return (
-		<div className="flex flex-col h-full">
-			<ConversationHeader
-				memberName={member?.user.name}
-				memberImage={member?.user.image}
-				onClick={() => {}}
-			/>
+  if (isMemberLoading || status === "LoadingFirstPage") return <Loading />;
 
-			<MessageList
-				data={results}
-				variant="conversation"
-				memberImage={member?.user.image}
-				memberName={member?.user.name}
-				loadMore={loadMore}
-				isLoadingMore={status === "LoadingMore"}
-				canLoadMore={status === "CanLoadMore"}
-			/>
+  return (
+    <div className="flex flex-col h-full">
+      <ConversationHeader
+        memberName={member?.user.name}
+        memberImage={member?.user.image}
+        onClick={() => onOpenProfile(memberId)}
+      />
 
-			<ChatInput
-				placeholder={`Message ${member?.user.name}`}
-				conversationId={id}
-			/>
-		</div>
-	);
+      <MessageList
+        data={results}
+        variant="conversation"
+        memberImage={member?.user.image}
+        memberName={member?.user.name}
+        loadMore={loadMore}
+        isLoadingMore={status === "LoadingMore"}
+        canLoadMore={status === "CanLoadMore"}
+      />
+
+      <ChatInput
+        placeholder={`Message ${member?.user.name}`}
+        conversationId={id}
+      />
+    </div>
+  );
 }
