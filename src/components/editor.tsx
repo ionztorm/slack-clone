@@ -142,7 +142,7 @@ const Editor = ({
   const onEmojiSelect = (emoji: Emoji) => {
     const quill = quillRef.current;
     // add emoji to the end of the editor text.
-    quill?.insertText(quill?.getSelection()?.index || 0, emoji.native);
+    quill?.insertText(quill?.getSelection()?.index || 0, emoji);
   };
 
   const isEmpty = !image && doesInputTextExistIgnoreHTML(text);
